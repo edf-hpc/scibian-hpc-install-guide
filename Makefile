@@ -1,7 +1,7 @@
 GENERATOR=/usr/lib/asciidoctor/scibian/exec/gen-base-guide
 TEMPLATE=/usr/share/asciidoctor/scibian/guide
 DOCTYPE=book
-SRC=main.asc
+SRC:=main.asc $(shell find src -name '*.asc')
 NAME=$(shell $(GENERATOR) --doc-name)
 
 IMG_DIR=src/img
