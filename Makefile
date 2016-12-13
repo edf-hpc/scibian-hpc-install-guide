@@ -13,8 +13,8 @@ all: html pdf
 
 html: $(NAME).html
 
-$(NAME).html: $(SRC) $(IMG_PNG)
-	asciidoctor --doctype $(DOCTYPE) --attribute data-uri --backend html5 --out-file $@ $(SRC)
+$(NAME).html: base.asc $(SRC) $(IMG_PNG)
+	asciidoctor --doctype $(DOCTYPE) --attribute data-uri --backend html5 --out-file $@ base.asc
 
 pdf: $(NAME).pdf
 
