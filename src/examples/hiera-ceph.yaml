@@ -1,0 +1,91 @@
+ceph::cluster_name: 'ceph'
+profiles::ceph::config_options:
+  'global':
+    'fsid':                    '9ce06246-210f-4f59-866a-1f384852da38'
+    'mon_initial_members':     'clservice2, clservice3, clservice4'
+    'mon_host':                'clservice2, clservice3, clservice4'
+    'auth_cluster_required':   'cephx'
+    'auth_service_required':   'cephx'
+    'auth_client_required':    'cephx'
+
+ceph_client_admin_key: <eyaml encrypted key>
+
+ceph::keyrings:
+  'client.admin.keyring':
+     'client.admin':
+        'key': "%{hiera('ceph_client_admin_key')}"
+  'ceph.mon.keyring':
+     'mon.':
+        'key': <eyaml encrypted key>
+        'caps mon': 'allow *'
+  'ceph.bootstrap-mds.keyring':
+     'client.bootstrap-mds':
+        'key': <eyaml encrypted key>
+  'ceph.bootstrap-osd.keyring':
+     'client.bootstrap-osd':
+        'key': <eyaml encrypted key>
+  'ceph.bootstrap-rgw.keyring':
+     'client.bootstrap-rgw':
+        'key': <eyaml encrypted key>
+
+ceph::osd_path: '/var/lib/ceph/osd'
+ceph::osd_config:
+  'clservice1':
+     'id': '0'
+     'device': '/dev/sdb1'
+     'key' : <eyaml encrypted key>
+  'clservice3':
+     'id': '1'
+     'device': '/dev/sdb1'
+     'key' : <eyaml encrypted key>
+  'clservice4':
+     'id': '2'
+     'device': '/dev/sdb1'
+     'key' : <eyaml encrypted key>
+  'clservice2':
+     'id': '3'
+     'device': '/dev/sdb1'
+     'key' : <eyaml encrypted key>
+
+ceph::mon_config:
+  - 'clservice2'
+  - 'clservice3'
+  - 'clservice4'
+
+ceph::mds_config:
+  - 'clservice2'
+  - 'clservice3'
+  - 'clservice4'
+
+ceph::mds_keyring:
+  'clservice2':
+    'mds.clservice2':
+       key: <eyaml encrypted key>
+  'clservice3':
+    'mds.clservice3':
+       key: <eyaml encrypted key>
+  'clservice4':
+    'mds.clservice4':
+       key: <eyaml encrypted key>
+
+ceph::rgw_config:
+  - 'clservice1'
+  - 'clservice2'
+  - 'clservice3'
+  - 'clservice4'
+
+ceph::rgw_client_keyring:
+  'clservice1':
+    'client.rgw.clservice1':
+      'key': <eyaml encrypted key>
+  'clservice2':
+    'client.rgw.clservice2':
+      'key': <eyaml encrypted key>
+  'clservice3':
+    'client.rgw.clservice3':
+      'key': <eyaml encrypted key>
+  'clservice4':
+    'client.rgw.clservice4':
+      'key': <eyaml encrypted key>
+
+
