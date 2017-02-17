@@ -34,15 +34,15 @@ ceph::osd_config:
      'id': '0'
      'device': '/dev/sdb1'
      'key' : <eyaml encrypted key>
-  'clservice3':
+  'clservice2':
      'id': '1'
      'device': '/dev/sdb1'
      'key' : <eyaml encrypted key>
-  'clservice4':
+  'clservice3':
      'id': '2'
      'device': '/dev/sdb1'
      'key' : <eyaml encrypted key>
-  'clservice2':
+  'clservice4':
      'id': '3'
      'device': '/dev/sdb1'
      'key' : <eyaml encrypted key>
@@ -87,5 +87,3 @@ ceph::rgw_client_keyring:
   'clservice4':
     'client.rgw.clservice4':
       'key': <eyaml encrypted key>
-
-
