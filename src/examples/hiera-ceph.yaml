@@ -1,4 +1,3 @@
-ceph::cluster_name: 'ceph'
 profiles::ceph::config_options:
   'global':
     'fsid':                    '9ce06246-210f-4f59-866a-1f384852da38'
@@ -28,7 +27,6 @@ ceph::keyrings:
      'client.bootstrap-rgw':
         'key': <eyaml encrypted key>
 
-ceph::osd_path: '/var/lib/ceph/osd'
 ceph::osd_config:
   'clservice1':
      'id': '0'
