@@ -1,0 +1,35 @@
+profiles:
+  # common
+  - profiles::cluster::common
+  - profiles::systemd::base
+  - profiles::ssmtp::client
+  - profiles::network::base
+  - profiles::dns::client
+  - profiles::access::base
+  - profiles::openssh::server
+  - profiles::openssh::client
+  - profiles::environment::base
+  - profiles::environment::limits
+  - profiles::environment::service
+  - profiles::log::client
+  # HW host
+  - profiles::hardware::ipmi
+  - profiles::hardware::admin_tuning
+  # admin
+  - profiles::hpcconfig::push
+  - profiles::hpcconfig::apply
+  - profiles::ntp::client
+  - profiles::openssh::client_identities
+  - profiles::clush::client
+  - profiles::consul::client
+  - profiles::conman::client
+  - profiles::clara::base
+  - profiles::ceph::client
+  - profiles::s3::s3cmd
+  - profiles::jobsched::client
+
+profiles::network::gw_connect: 'wan'
+
+profiles::environment::service::packages:
+ - scibian-hpc-admin
+

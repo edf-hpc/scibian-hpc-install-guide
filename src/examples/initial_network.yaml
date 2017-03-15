@@ -1,0 +1,232 @@
+network::ib_enable:  false
+network::opa_enable: true
+
+net::administration::ipnetwork:     '10.1.0.0'
+net::administration::netmask:       '255.255.255.0'
+net::administration::prefix_length: '/24'
+net::administration::broadcast:     '10.1.0.255'
+net::lowlatency::ipnetwork:         '10.4.0.0'
+net::lowlatency::prefix_length:     '/24'
+net::management::ipnetwork:         '10.2.0.0'
+net::management::netmask:           '255.255.255.0'
+net::management::broadcast:         '10.2.0.255'
+
+net_topology:
+  wan:
+    name:             'WAN'
+    prefixes:         'wan'
+    ipnetwork:        '10.3.0.0'
+    netmask:          '255.255.255.0'
+    prefix_length:    '/24'
+    gateway:          '10.3.0.254'
+    broadcast:        '10.3.0.255'
+    ip_range_start:   '10.3.0.1'
+    ip_range_end:     '10.3.0.254'
+    firewall_zone:    'wan'
+  administration:
+    name:             'CLUSTER'
+    ipnetwork:        '10.1.0.0'
+    netmask:          '255.255.255.0'
+    prefix_length:    '/24'
+    gateway:          '10.1.0.0' # fbproxy
+    broadcast:        '10.1.0.255'
+    ip_range_start:   '10.1.0.1'
+    ip_range_end:     '10.1.0.254'
+    firewall_zone:    'clstr'
+    pool0:
+      ip_range_start: '10.1.0.1'
+      ip_range_end:   '10.1.0.254'
+  lowlatency:
+    name:             'LOWLATENCY'
+    prefixes:         'opa'
+    ipnetwork:        '10.4.0.0'
+    netmask:          '255.255.255.0'
+    prefix_length:    '/24'
+    broadcast:        '10.4.0.255'
+    ip_range_start:   '10.4.0.1'
+    ip_range_end:     '10.4.0.254'
+    firewall_zone:    'clstr'
+  management:
+    name:             'MGT'
+    prefixes:         'mgt'
+    ipnetwork:        '10.2.0.0'
+    netmask:          '255.255.255.0'
+    prefix_length:    '/24'
+    broadcast:        '10.2.0.255'
+    ip_range_start:   '10.2.0.1'
+    ip_range_end:     '10.2.0.254'
+    firewall_zone:    'clstr'
+  bmc:
+    name:             'BMC'
+    prefixes:         'bmc'
+    ipnetwork:        '10.2.0.0'
+    netmask:          '255.255.255.0'
+    prefix_length:    '/24'
+    broadcast:        '10.2.0.255'
+    ip_range_start:   '10.2.0.1'
+    ip_range_end:     '10.2.0.254'
+    firewall_zone:    'clstr'
+
+network::bonding_options:
+  bond0:
+    slaves:
+      - eth1
+      - eth2
+    options:     'mode=802.3ad primary=eth2 miimon=100 updelay=200 downdelay=200'
+    description: 'service nodes on adm/mgt networks'
+
+network::bridge_options:
+  br0:
+    ports:
+      - bond0
+    description: 'service nodes on administration network'
+  br1:
+    ports:
+      - eth3
+    description: 'service nodes on management network'
+  br2:
+    ports:
+      - eth4
+    description: 'service nodes on WAN network'
+
+master_network:
+  fbservice1:
+    fqdn: "fbservice1.%{hiera('domain')}"
+    networks:
+      administration:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:00'
+        'IP':       '10.1.0.1'
+        'device':   'br0'
+        'hostname': 'fbservice1'
+      lowlatency:
+        'IP':       '10.4.0.1'
+        'device':   'ib0'
+        'hostname': 'opafbservice1'
+      bmc:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:01'
+        'IP':       '10.2.0.101'
+        'hostname': 'bmcfbservice1'
+      management:
+        'IP':       '10.2.0.1'
+        'device':   'br1'
+        'hostname': 'mgtfbservice1'
+      wan:
+        'IP':       '10.3.0.1'
+        'device':   'br2'
+        'hostname': 'wanfbservice1'
+  fbservice2:
+    fqdn: "fbservice2.%{hiera('domain')}"
+    networks:
+      administration:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:02'
+        'IP':       '10.1.0.2'
+        'device':   'br0'
+        'hostname': 'fbservice2'
+      lowlatency:
+        'IP':       '10.4.0.2'
+        'device':   'ib0'
+        'hostname': 'opafbservice2'
+      bmc:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:03'
+        'IP':       '10.2.0.102'
+        'hostname': 'bmcfbservice2'
+      management:
+        'IP':       '10.2.0.2'
+        'device':   'br1'
+        'hostname': 'mgtfbservice2'
+      wan:
+        'IP':       '10.3.0.2'
+        'device':   'br2'
+        'hostname': 'wanfbservice2'
+  fbservice3:
+    fqdn: "fbservice3.%{hiera('domain')}"
+    networks:
+      administration:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:04'
+        'IP':       '10.1.0.3'
+        'device':   'br0'
+        'hostname': 'fbservice3'
+      lowlatency:
+        'IP':       '10.4.0.3'
+        'device':   'ib0'
+        'hostname': 'opafbservice3'
+      bmc:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:05'
+        'IP':       '10.2.0.103'
+        'hostname': 'bmcfbservice3'
+      management:
+        'IP':       '10.2.0.3'
+        'device':   'br1'
+        'hostname': 'mgtfbservice3'
+      wan:
+        'IP':       '10.3.0.3'
+        'device':   'br2'
+        'hostname': 'wanfbservice3'
+  fbservice4:
+    fqdn: "fbservice4.%{hiera('domain')}"
+    networks:
+      administration:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:06'
+        'IP':       '10.1.0.4'
+        'device':   'br0'
+        'hostname': 'fbservice4'
+      lowlatency:
+        'IP':       '10.4.0.4'
+        'device':   'ib0'
+        'hostname': 'opafbservice4'
+      bmc:
+        'DHCP_MAC': 'aa:bb:cc:dd:ee:07'
+        'IP':       '10.2.0.104'
+        'hostname': 'bmcfbservice4'
+      management:
+        'IP':       '10.2.0.4'
+        'device':   'br1'
+        'hostname': 'mgtfbservice4'
+      wan:
+        'IP':       '10.3.0.4'
+        'device':   'br2'
+        'hostname': 'wanfbservice4'
+
+#### High-Availability Virtual IP addresses ######
+vips:
+  service1:
+    network:    'administration'
+    ip:         '10.1.0.101'
+    hostname:   'vipfbservice1'
+    router_id:  161
+    master:     'fbservice1'
+    members:    'fbservice[1-4]'
+    notify:
+      common:
+        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+    advert_int: '2'
+  service2:
+    network:    'administration'
+    ip:         '10.1.0.102'
+    hostname:   'vipfbservice2'
+    router_id:  162
+    master:     'fbservice2'
+    members:    'fbservice[1-4]'
+    notify:
+      common:
+        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+  service3:
+    network:    'administration'
+    ip:         '10.1.0.103'
+    hostname:   'vipfbservice3'
+    router_id:  163
+    master:     'fbservice3'
+    members:    'fbservice[1-4]'
+    notify:
+      common:
+        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+  service4:
+    network:    'administration'
+    ip:         '10.1.0.104'
+    hostname:   'vipfbservice4'
+    router_id:  164
+    master:     'fbservice4'
+    members:    'fbservice[1-4]'
+    notify:
+      common:
+        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"

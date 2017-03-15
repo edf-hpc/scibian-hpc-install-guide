@@ -1,0 +1,7 @@
+hpc-config.conf		etc/			0644
+resolv.conf		etc/			0644
+proxy			etc/apt/apt.conf.d/	0644
+no-cache		etc/apt/apt.conf.d/	0644
+no-recommends		etc/apt/apt.conf.d/	0644
+interfaces		etc/network/		0644
+mk_ipmi_dev.sh		usr/local/sbin/		0755

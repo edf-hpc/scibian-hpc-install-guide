@@ -1,0 +1,32 @@
+profiles:
+  # common
+  - profiles::cluster::common
+  - profiles::systemd::base
+  - profiles::ssmtp::client
+  - profiles::network::base
+  - profiles::dns::client
+  - profiles::access::base
+  - profiles::openssh::server
+  - profiles::openssh::client
+  - profiles::environment::base
+  - profiles::environment::limits
+  - profiles::environment::service
+  - profiles::log::client
+  # HW host
+  - profiles::hardware::ipmi
+  - profiles::hardware::admin_tuning
+  # service
+  - profiles::hpcconfig::push
+  - profiles::hpcconfig::apply
+  - profiles::ntp::server
+  - profiles::openssh::client_identities
+  - profiles::clush::client
+  - profiles::ha::base
+  - profiles::http::secret
+  - profiles::apt::proxy
+  - profiles::log::server
+  - profiles::dns::server
+  - profiles::bootsystem::server
+  - profiles::dhcp::server
+
+profiles::network::gw_connect: 'wan'

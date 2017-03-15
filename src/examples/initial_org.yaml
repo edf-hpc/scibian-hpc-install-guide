@@ -1,0 +1,71 @@
+##### Common #####
+
+org: 'company' # lower-case name of the organization
+
+##### DNS #####
+
+domain: "%{hiera('cluster_name')}.hpc.example.org"
+
+profiles::dns::client::search: "%{hiera('domain')} hpc.example.org"
+
+profiles::dns::server::config_options:
+  forwarders:
+    - '1.1.1.1'
+    - '2.2.2.2'
+
+##### NTP #####
+
+profiles::ntp::server::site_servers:
+  - "ntp1.example.org"
+  - "ntp2.example.org"
+
+##### APT #####
+
+profiles::cluster::apt_sources:
+  'jessie':
+    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
+    release: 'jessie'
+    repos: 'main contrib non-free'
+    required_packages: 'debian-archive-keyring'
+    pin: '500'
+    include_src: false
+    architecture: 'amd64,i386'
+  'jessie-updates':
+    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
+    release: 'jessie-updates'
+    repos: 'main contrib non-free'
+    required_packages: 'debian-archive-keyring'
+    pin: '500'
+    include_src: false
+    architecture: 'amd64,i386'
+  'jessie-security':
+    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_sec_mirror_dir')}"
+    release: 'jessie/updates'
+    repos: 'main contrib non-free'
+    required_packages: 'debian-archive-keyring'
+    pin: '500'
+    include_src: false
+    architecture: 'amd64,i386'
+  'scibian8':
+    location: "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')}"
+    release: 'scibian8'
+    repos: 'main'
+    required_packages: 'scibian-archive-keyring'
+    pin: '1000'
+    include_src: false
+    architecture: 'amd64,i386'
+
+##### SMTP/Postfix #####
+
+profiles::postfix::relay::config_options:
+  relay_domains:       '$mydestination example.org'
+  relayhost:           'smtp.example.org'
+
+##### LDAP/SSSD #####
+
+ldap_external: 'ldap.example.org'
+
+profiles::auth::client::sssd_options_domain:
+  ldap_search_base:       'dc=example,dc=org'
+  ldap_user_search_base:  'ou=people,dc=example,dc=org'
+  ldap_group_search_base: 'ou=groups,dc=example,dc=org'
