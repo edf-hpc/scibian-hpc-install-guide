@@ -1,8 +1,14 @@
 title: Scibian HPC Installation guide
 name: scibian_hpc_installation_guide
+- tag: 1.0
+  date: 2017-05-04
+  status: draft
+  changes:
+  - "Fixes after testing the procedure with hpc-config 1.0"
+  - "More details on the first run on temp installation node"
 versions:
 - tag: 0.1
-  date: 01/01/1970
+  date: 1970-01-01
   status: draft
   changes:
   - First draft version
