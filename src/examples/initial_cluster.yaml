@@ -39,12 +39,12 @@ boot_params:
     diskless_server:    '10.1.0.50:3137' # VIP addresse of P2P servers
     nameserver:         '10.1.0.101'     # VIP address of 1st generic
                                          # service on administration network
-    boot_os:            'scibian8_ram'
+    boot_os:            'scibian9_ram'
     boot_dev:           'eth0'
     console:            'ttyS0,115200n8'
   fbservice[1-4]:                            # generic service nodes specific
                                              # boot params
-    boot_os:            'scibian8_disk'
+    boot_os:            'scibian9_disk'
     ipxebin:            'ipxe_noserial.bin'
 
 # iPXE ROM downloaded by TFTP. There are 2 versions of the same ROM: with
@@ -60,20 +60,20 @@ boottftp::hpc_files:
 # Configuration files downloaded by HTTP by the debian-installer: the partition
 # schema and hpc-config-apply configuration file.
 boothttp::hpc_files:
-  "%{hiera('website_dir')}/disk/scibian8/partition-schema":
-    source: "%{hiera('private_files_dir')}/boot/disk-installer/scibian8/partition-schema"
-  "%{hiera('website_dir')}/disk/scibian8/hpc-config.conf":
+  "%{hiera('website_dir')}/disk/scibian9/partition-schema":
+    source: "%{hiera('private_files_dir')}/boot/disk-installer/scibian9/partition-schema"
+  "%{hiera('website_dir')}/disk/scibian9/hpc-config.conf":
     source: "file:///etc/hpc-config.conf"
 
 # The tarball containing the Debian network installer
 boothttp::archives:
-  "%{hiera('website_dir')}/disk/scibian8/netboot.tar.gz":
-    source:       "%{hiera('private_files_dir')}/boot/disk-installer/scibian8/netboot.tar.gz"
-    extract_path: "%{hiera('website_dir')}/disk/scibian8"
+  "%{hiera('website_dir')}/disk/scibian9/netboot.tar.gz":
+    source:       "%{hiera('private_files_dir')}/boot/disk-installer/scibian9/netboot.tar.gz"
+    extract_path: "%{hiera('website_dir')}/disk/scibian9"
     extract:      true
 
 boothttp::install_options:
-  scibian8:
+  scibian9:
     ### Localization
     'd-i debian-installer/locale string':                   'en_US.UTF-8'
     'd-i debian-installer/language string':                 'en'
@@ -111,7 +111,7 @@ boothttp::install_options:
     'd-i hw-detect/load_firmware boolean':                  'true'
     ### Partitioning
     'd-i partman/early_command string': >
-      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian8/partition-schema -O /partition-schema;
+      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian9/partition-schema -O /partition-schema;
       debconf-set partman-auto/disk "$(list-devices disk | head -n1)"
     'd-i partman-auto/method string':                                           'lvm'
     'd-i partman-partitioning/choose_label select':                             'gpt'
@@ -159,7 +159,7 @@ boothttp::install_options:
       scibian-archive-keyring
       hpc-config-apply
     # Additional repositories, local[0-9] available
-    'd-i apt-setup/local0/repository string': "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')} scibian8 main contrib non-free"
+    'd-i apt-setup/local0/repository string': "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')} scibian9 main contrib non-free"
     'd-i pkgsel/upgrade select':              'full-upgrade'
     # Other packages ##
     'd-i popularity-contest/participate boolean':                       'false'
@@ -171,7 +171,7 @@ boothttp::install_options:
     ### Late command ###
     'd-i preseed/late_command string': >
       /bin/in-target sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config;
-      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian8/hpc-config.conf -O /target/etc/hpc-config.conf;
+      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian9/hpc-config.conf -O /target/etc/hpc-config.conf;
       /bin/in-target mkdir -p /var/lib/puppet/facts.d;
       /bin/in-target /usr/bin/env -u http_proxy hpc-config-apply -vvv;
     # Root password, either in clear text

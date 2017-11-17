@@ -46,9 +46,9 @@ profiles::cluster::apt_sources:
     pin: '500'
     include_src: false
     architecture: 'amd64,i386'
-  'scibian8':
+  'scibian9':
     location: "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')}"
-    release: 'scibian8'
+    release: 'scibian9'
     repos: 'main'
     required_packages: 'scibian-archive-keyring'
     pin: '1000'
