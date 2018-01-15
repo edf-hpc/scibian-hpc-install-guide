@@ -22,25 +22,25 @@ profiles::ntp::server::site_servers:
 ##### APT #####
 
 profiles::cluster::apt_sources:
-  'jessie':
+  'stretch':
     location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
-    release: 'jessie'
+    release: 'stretch'
     repos: 'main contrib non-free'
     required_packages: 'debian-archive-keyring'
     pin: '500'
     include_src: false
     architecture: 'amd64,i386'
-  'jessie-updates':
+  'stretch-updates':
     location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
-    release: 'jessie-updates'
+    release: 'stretch-updates'
     repos: 'main contrib non-free'
     required_packages: 'debian-archive-keyring'
     pin: '500'
     include_src: false
     architecture: 'amd64,i386'
-  'jessie-security':
+  'stretch-security':
     location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_sec_mirror_dir')}"
-    release: 'jessie/updates'
+    release: 'stretch/updates'
     repos: 'main contrib non-free'
     required_packages: 'debian-archive-keyring'
     pin: '500'
