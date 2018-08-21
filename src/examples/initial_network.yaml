@@ -1,15 +1,5 @@
-network::ib_enable:  false
-network::opa_enable: true
-
-net::administration::ipnetwork:     '10.1.0.0'
-net::administration::netmask:       '255.255.255.0'
-net::administration::prefix_length: '/24'
-net::administration::broadcast:     '10.1.0.255'
-net::lowlatency::ipnetwork:         '10.4.0.0'
-net::lowlatency::prefix_length:     '/24'
-net::management::ipnetwork:         '10.2.0.0'
-net::management::netmask:           '255.255.255.0'
-net::management::broadcast:         '10.2.0.255'
+profiles::network::ib_enable:  false
+profiles::network::opa_enable: true
 
 net_topology:
   wan:
@@ -68,25 +58,25 @@ net_topology:
     firewall_zone:    'clstr'
 
 network::bonding_options:
-  bond0:
+  bondadm:
     slaves:
-      - eth1
-      - eth2
+      - eno1
+      - eno2
     options:     'mode=802.3ad primary=eth2 miimon=100 updelay=200 downdelay=200'
     description: 'service nodes on adm/mgt networks'
 
 network::bridge_options:
-  br0:
+  bradm:
     ports:
-      - bond0
+      - bondadm
     description: 'service nodes on administration network'
-  br1:
+  brmgt:
     ports:
-      - eth3
+      - eno3
     description: 'service nodes on management network'
-  br2:
+  brwan:
     ports:
-      - eth4
+      - eno4
     description: 'service nodes on WAN network'
 
 master_network:
@@ -96,7 +86,7 @@ master_network:
       administration:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:00'
         'IP':       '10.1.0.1'
-        'device':   'br0'
+        'device':   'bradm'
         'hostname': 'fbservice1'
       lowlatency:
         'IP':       '10.4.0.1'
@@ -108,11 +98,11 @@ master_network:
         'hostname': 'bmcfbservice1'
       management:
         'IP':       '10.2.0.1'
-        'device':   'br1'
+        'device':   'brmgt'
         'hostname': 'mgtfbservice1'
       wan:
         'IP':       '10.3.0.1'
-        'device':   'br2'
+        'device':   'brwan'
         'hostname': 'wanfbservice1'
   fbservice2:
     fqdn: "fbservice2.%{hiera('domain')}"
@@ -120,7 +110,7 @@ master_network:
       administration:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:02'
         'IP':       '10.1.0.2'
-        'device':   'br0'
+        'device':   'bradm'
         'hostname': 'fbservice2'
       lowlatency:
         'IP':       '10.4.0.2'
@@ -132,11 +122,11 @@ master_network:
         'hostname': 'bmcfbservice2'
       management:
         'IP':       '10.2.0.2'
-        'device':   'br1'
+        'device':   'brmgt'
         'hostname': 'mgtfbservice2'
       wan:
         'IP':       '10.3.0.2'
-        'device':   'br2'
+        'device':   'brwan'
         'hostname': 'wanfbservice2'
   fbservice3:
     fqdn: "fbservice3.%{hiera('domain')}"
@@ -144,7 +134,7 @@ master_network:
       administration:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:04'
         'IP':       '10.1.0.3'
-        'device':   'br0'
+        'device':   'bradm'
         'hostname': 'fbservice3'
       lowlatency:
         'IP':       '10.4.0.3'
@@ -156,11 +146,11 @@ master_network:
         'hostname': 'bmcfbservice3'
       management:
         'IP':       '10.2.0.3'
-        'device':   'br1'
+        'device':   'brmgt'
         'hostname': 'mgtfbservice3'
       wan:
         'IP':       '10.3.0.3'
-        'device':   'br2'
+        'device':   'brwan'
         'hostname': 'wanfbservice3'
   fbservice4:
     fqdn: "fbservice4.%{hiera('domain')}"
@@ -168,7 +158,7 @@ master_network:
       administration:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:06'
         'IP':       '10.1.0.4'
-        'device':   'br0'
+        'device':   'bradm'
         'hostname': 'fbservice4'
       lowlatency:
         'IP':       '10.4.0.4'
@@ -180,14 +170,18 @@ master_network:
         'hostname': 'bmcfbservice4'
       management:
         'IP':       '10.2.0.4'
-        'device':   'br1'
+        'device':   'brmgt'
         'hostname': 'mgtfbservice4'
       wan:
         'IP':       '10.3.0.4'
-        'device':   'br2'
+        'device':   'brwan'
         'hostname': 'wanfbservice4'
 
 #### High-Availability Virtual IP addresses ######
+
+## This secret value MUST be changed later and/or higher
+## in the hierarchy. It MUST be encrypted with eyaml.
+vips_secret: 'CHANGEME'
 vips:
   service1:
     network:    'administration'
@@ -196,9 +190,7 @@ vips:
     router_id:  161
     master:     'fbservice1'
     members:    'fbservice[1-4]'
-    notify:
-      common:
-        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+    secret:     "%{hiera('vips_secret')}"
     advert_int: '2'
   service2:
     network:    'administration'
@@ -207,9 +199,8 @@ vips:
     router_id:  162
     master:     'fbservice2'
     members:    'fbservice[1-4]'
-    notify:
-      common:
-        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+    secret:     "%{hiera('vips_secret')}"
+    advert_int: '2'
   service3:
     network:    'administration'
     ip:         '10.1.0.103'
@@ -217,9 +208,8 @@ vips:
     router_id:  163
     master:     'fbservice3'
     members:    'fbservice[1-4]'
-    notify:
-      common:
-        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+    secret:     "%{hiera('vips_secret')}"
+    advert_int: '2'
   service4:
     network:    'administration'
     ip:         '10.1.0.104'
@@ -227,6 +217,5 @@ vips:
     router_id:  164
     master:     'fbservice4'
     members:    'fbservice[1-4]'
-    notify:
-      common:
-        - "%{hiera('private_files_dir')}/ha/rndc_reload.sh"
+    secret:     "%{hiera('vips_secret')}"
+    advert_int: '2'

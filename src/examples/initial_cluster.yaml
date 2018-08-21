@@ -1,8 +1,16 @@
 cluster_prefix: 'fb' # Prefix starting all nodes hostnames
 
+
 user_groups: # Array of user groups allowed to access to the cluster
   - 'grpusers1'
   - 'grpusers2'
+admin_group: 'grpadmin'
+
+###### Installer ######
+scibian_mirror_server: 'scibian.org'
+scibian_mirror_dir:    'repo'
+debian_mirror_server:  'ftp.debian.org'
+debian_mirror_dir:     'debian'
 
 ###### DNS Cluster settings ######
 
@@ -42,6 +50,8 @@ boot_params:
     boot_os:            'scibian9_ram'
     boot_dev:           'eth0'
     console:            'ttyS0,115200n8'
+    disk_raid:          ''
+    disk_format:        ''
   fbservice[1-4]:                            # generic service nodes specific
                                              # boot params
     boot_os:            'scibian9_disk'
@@ -72,6 +82,10 @@ boothttp::archives:
     extract_path: "%{hiera('website_dir')}/disk/scibian9"
     extract:      true
 
+profiles::http::secret::areas:
+  - 'service'
+  - 'user'
+
 boothttp::install_options:
   scibian9:
     ### Localization
@@ -92,6 +106,7 @@ boothttp::install_options:
     'd-i mirror/country string':                            'manual'
     'd-i mirror/http/hostname string':                      "%{hiera('debian_mirror_server')}"
     'd-i mirror/http/directory string':                     "/%{hiera('debian_mirror_dir')}"
+    'd-i mirror/http/proxy string':                         "http://apt.service.%{hiera('virtual_domain')}:%{hiera('apt::proxy_port')}"
     'd-i mirror/suite string':                              'stretch'
     'd-i debian-installer/allow_unauthenticated boolean':   'true'
     ### Network configuration
@@ -182,8 +197,8 @@ boothttp::install_options:
 ###### DHCP ######
 
 profiles::dhcp::default_options:
-  - 'INTERFACES=br0 br1' # bridge interfaces of the generic service nodes on the
-                         # administration and management networks
+  - 'INTERFACES=bradm' # bridge interfaces of the generic service nodes on the
+                       # administration and management networks
 profiles::dhcp::includes:
   adm-subnet:
     'pool_name':                   'subnet'
@@ -225,3 +240,7 @@ profiles::dhcp::sharednet:
       # Static IP addresses of the generic service nodes on the management network
       'domain-name-servers':       '10.2.0.1, 10.2.0.2, 10.2.0.3, 10.2.0.4'
       'broadcast':                 "%{hiera('net::management::broadcast')}"
+
+profiles::dhcp::networks:
+  - administration
+  - management

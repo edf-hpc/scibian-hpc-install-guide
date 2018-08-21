@@ -17,7 +17,7 @@
     <apic/>
     <pae/>
   </features>
-  <cpu mode='custom' match='exact'> </cpu>
+  <cpu mode='host-model' match='exact'> </cpu>
   <clock offset='utc'>
     <timer name='rtc' tickpolicy='catchup'/>
     <timer name='pit' tickpolicy='delay'/>

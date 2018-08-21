@@ -23,6 +23,7 @@ profiles:
   - profiles::clush::client
   - profiles::ha::base
   - profiles::http::secret
+  - profiles::http::system
   - profiles::apt::proxy
   - profiles::log::server
   - profiles::dns::server

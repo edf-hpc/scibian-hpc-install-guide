@@ -1,6 +1,11 @@
 title: Scibian 9 HPC Installation guide
 name: scibian9_hpc_installation_guide
 versions:
+- tag: 1.90
+  date: 2018-08-20
+  status: draft
+  changes:
+  - "Improvement during S9 test environment install"
 - tag: 0.1
   date: 2017-11-17
   status: draft

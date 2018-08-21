@@ -30,11 +30,11 @@ ipxe_menu = {
         'goto'    : 'goto start',
     },
     'menu'    : {
-        'scibian9_ram' : {
-            'label'  : 'Run Scibian8 in RAM',
-            'url'    : "http://" + lookup_param('diskless_server') + "/scibian9",
-            'initrd' : '${base-url}/initrd-4.9.0-4-amd64',
-            'kernel' : "${base-url}/vmlinuz-4.9.0-4-amd64 initrd=initrd-4.9.0-4-amd64 " + 
+        'scibian8_ram' : {
+            'label'  : 'Run Calibre9 in RAM',
+            'url'    : "http://" + lookup_param('diskless_server') + "/scibian8",
+            'initrd' : '${base-url}/initrd-3.16.0-5-amd64',
+            'kernel' : "${base-url}/vmlinuz-3.16.0-5-amd64 initrd=initrd-3.16.0-5-amd64 " +
                        " console=" + lookup_param('console') +
                        " ethdevice=" + lookup_param('boot_dev') +
                        " ethdevice-timeout=" + lookup_param('dhcp_timeout') +
@@ -42,21 +42,130 @@ ipxe_menu = {
                        " transparent_hugepage=always " +
                        " disk-format=" + lookup_param('disk_format') +
                        " disk-raid=" + lookup_param('disk_raid') +
-                       " boot=live " + 
+                       " boot=live " +
+                       " fetch=http://" + lookup_param('diskless_server') + "/scibian8/scibian8.squashfs.torrent " +
+                       lookup_param('kernel_opts'),
+        },
+        'scibian8-test_ram' : {
+            'label'  : 'Run Calibre9 test in RAM',
+            'url'    : "http://" + lookup_param('diskless_server') + "/scibian8",
+            'initrd' : '${base-url}/initrd-3.16.0-6-amd64',
+            'kernel' : "${base-url}/vmlinuz-3.16.0-6-amd64 initrd=initrd-3.16.0-6-amd64 " +
+                       " console=" + lookup_param('console') +
+                       " ethdevice=" + lookup_param('boot_dev') +
+                       " ethdevice-timeout=" + lookup_param('dhcp_timeout') +
+                       " cowsize=" + lookup_param('cowsize') +
+                       " transparent_hugepage=always " +
+                       " disk-format=" + lookup_param('disk_format') +
+                       " disk-raid=" + lookup_param('disk_raid') +
+                       " boot=live " +
+                       " hpc_conf.environment=test " +
+                       " fetch=http://" + lookup_param('diskless_server') + "/scibian8/scibian8-test.squashfs.torrent " +
+                       lookup_param('kernel_opts'),
+        },
+        'scibian8_disk' : {
+            'label'  : 'Install Calibre9',
+            'url'    : "http://"+lookup_param('diskinstall_server')+"/disk/scibian8",
+            'initrd' : '${base-url}/debian-installer/amd64/initrd.gz',
+            'kernel' : "${base-url}/debian-installer/amd64/linux initrd=initrd.gz " +
+                       " console=" + lookup_param('console') +
+                       " url=${base-url}/install_config " +
+                       " auto " +
+                       " interface=" + lookup_param('boot_dev') +
+                       " locale=en_US " +
+                       " console-keymaps-at/keymap=fr " +
+                       " keyboard-configuration/xkb-keymap=fr " +
+                       " languagechooser/language-name=English " +
+                       " netcfg/get_domain=" + lookup_param('domain') +
+                       " netcfg/get_nameservers=" + lookup_param('nameserver') +
+                       " netcfg/no_default_route=true " +
+                       " debian-installer/add-kernel-opts=console=" + lookup_param('console') +
+                       " priority=critical " +
+                       " scibian-installer",
+        },
+        'scibian8_rescue' : {
+            'label'  : 'Rescue Calibre9',
+            'url'    : "http://"+lookup_param('diskinstall_server')+"/disk/scibian8",
+            'initrd' : '${base-url}/debian-installer/amd64/initrd.gz',
+            'kernel' : "${base-url}/debian-installer/amd64/linux initrd=initrd.gz " +
+                       " console=" + lookup_param('console') +
+                       " rescue/enable=true " +
+                       " interface=" + lookup_param('boot_dev') +
+                       " locale=en_US " +
+                       " console-keymaps-at/keymap=fr " +
+                       " keyboard-configuration/xkb-keymap=fr " +
+                       " languagechooser/language-name=English " +
+                       " netcfg/get_domain=" + lookup_param('domain') +
+                       " netcfg/get_nameservers=" + lookup_param('nameserver') +
+                       " netcfg/no_default_route=true "
+        },
+        'scibian9_ram' : {
+            'label'  : 'Run Scibian9 in RAM',
+            'url'    : "http://" + lookup_param('diskless_server') + "/scibian9",
+            'initrd' : '${base-url}/initrd-4.9.0-7-amd64',
+            'kernel' : "${base-url}/vmlinuz-4.9.0-7-amd64 initrd=initrd-4.9.0-7-amd64 " +
+                       " console=" + lookup_param('console') +
+                       " ethdevice=" + lookup_param('boot_dev') +
+                       " ethdevice-timeout=" + lookup_param('dhcp_timeout') +
+                       " cowsize=" + lookup_param('cowsize') +
+                       " transparent_hugepage=always " +
+                       " disk-format=" + lookup_param('disk_format') +
+                       " disk-raid=" + lookup_param('disk_raid') +
+                       " boot=live " +
+                       " union=overlay" +
                        " fetch=http://" + lookup_param('diskless_server') + "/scibian9/scibian9.squashfs.torrent " +
                        lookup_param('kernel_opts'),
         },
         'scibian9_disk' : {
-            'label'  : 'Install Scibian8',
+            'label'  : 'Install Scibian9',
             'url'    : "http://"+lookup_param('diskinstall_server')+"/disk/scibian9",
             'initrd' : '${base-url}/debian-installer/amd64/initrd.gz',
-            'kernel' : "${base-url}/debian-installer/amd64/linux initrd=initrd.gz console="+lookup_param('console')+" url=${base-url}/install_config auto interface="+lookup_param('boot_dev')+" locale=en_US console-keymaps-at/keymap=fr keyboard-configuration/xkb-keymap=fr languagechooser/language-name=English netcfg/get_domain="+lookup_param('domain')+" netcfg/get_nameservers="+lookup_param('nameserver')+" netcfg/no_default_route=true debian-installer/add-kernel-opts=console="+lookup_param('console')+" priority=critical scibian-installer",
+            'kernel' : "${base-url}/debian-installer/amd64/linux initrd=initrd.gz " +
+                       " url=${base-url}/install_config " +
+                       " console=" + lookup_param('console') +
+                       " auto " +
+                       " interface=" + lookup_param('boot_dev') +
+                       " locale=en_US " +
+                       " console-keymaps-at/keymap=fr " +
+                       " keyboard-configuration/xkb-keymap=fr " +
+                       " languagechooser/language-name=English " +
+                       " netcfg/get_domain=" + lookup_param('domain') +
+                       " netcfg/get_nameservers=" + lookup_param('nameserver') +
+                       " netcfg/no_default_route=true " +
+                       " debian-installer/add-kernel-opts=console=" + lookup_param('console') +
+                       " priority=critical " +
+                       " scibian-installer",
+        },
+        'scibian9_rescue' : {
+            'label'  : 'Rescue Scibian9',
+            'url'    : "http://"+lookup_param('diskinstall_server')+"/disk/scibian9",
+            'initrd' : '${base-url}/debian-installer/amd64/initrd.gz',
+            'kernel' : "${base-url}/debian-installer/amd64/linux initrd=initrd.gz " +
+                       " console=" + lookup_param('console') +
+                       " rescue/enable=true " +
+                       " interface=" + lookup_param('boot_dev') +
+                       " locale=en_US " +
+                       " console-keymaps-at/keymap=fr " +
+                       " keyboard-configuration/xkb-keymap=fr " +
+                       " languagechooser/language-name=English " +
+                       " netcfg/get_domain=" + lookup_param('domain') +
+                       " netcfg/get_nameservers=" + lookup_param('nameserver') +
+                       " netcfg/no_default_route=true "
+        },
+        'rhel6_disk' : {
+            'label'  : 'Install RHEL 6',
+            'url'    : "http://"+lookup_param('diskinstall_server')+"/disk/rhel6",
+            'initrd' : '${base-url}/initrd.img',
+            'kernel' : "${base-url}/vmlinuz initrd=initrd.img " +
+                       " console=" + lookup_param('console') +
+                       " ksdevice=" + lookup_param('boot_dev') +
+                       " ks=${base-url}/install_config "
         },
         'discovery' : {
             'label'  : 'Discover/Rescue system',
-            'url'    : "http://"+lookup_param('diskless_server')+"/scibian9",
-            'initrd' : '${base-url}/initrd-4.9.0-4-amd64',
-            'kernel' : "${base-url}/vmlinuz-4.9.0-4-amd64 initrd=initrd-4.9.0-4-amd64 console="+lookup_param('console')+" boot=discovery interface="+lookup_param('boot_dev'),
+            'url'    : "http://"+lookup_param('diskless_server')+"/disk/scibian8",
+            'initrd' : '${base-url}/initrd-3.16.0-4-amd64',
+            'kernel' : "${base-url}/vmlinuz-3.16.0-4-amd64 initrd=initrd-3.16.0-4-amd64 console="+lookup_param('console')+" boot=discovery interface="+lookup_param('boot_dev'),
         },
     },
 }
@@ -87,3 +196,7 @@ for key in ipxe_menu["menu"]:
     print("kernel "+ipxe_menu["menu"][key]["kernel"])
     print(ipxe_menu["params"]["boot"])
     print(ipxe_menu["params"]["goto"])
+
+print("")
+print(":local")
+print("exit")
