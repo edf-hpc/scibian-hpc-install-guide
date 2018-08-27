@@ -63,22 +63,22 @@ boot_params:
 # redirected to the BMC virtual serial port by the BIOS/UEFI on these nodes.
 boottftp::hpc_files:
   "%{hiera('tftp_dir')}/ipxe_serial.bin":
-    source: "%{hiera('private_files_dir')}/boot/ipxe/ipxe_serial.bin"
+    source: "%{::private_files_dir}/boot/ipxe/ipxe_serial.bin"
   "%{hiera('tftp_dir')}/ipxe_noserial.bin":
-    source: "%{hiera('private_files_dir')}/boot/ipxe/ipxe_noserial.bin"
+    source: "%{::private_files_dir}/boot/ipxe/ipxe_noserial.bin"
 
 # Configuration files downloaded by HTTP by the debian-installer: the partition
 # schema and hpc-config-apply configuration file.
 boothttp::hpc_files:
   "%{hiera('website_dir')}/disk/scibian9/partition-schema":
-    source: "%{hiera('private_files_dir')}/boot/disk-installer/scibian9/partition-schema"
+    source: "%{::private_files_dir}/boot/disk-installer/scibian9/partition-schema"
   "%{hiera('website_dir')}/disk/scibian9/hpc-config.conf":
     source: "file:///etc/hpc-config.conf"
 
 # The tarball containing the Debian network installer
 boothttp::archives:
   "%{hiera('website_dir')}/disk/scibian9/netboot.tar.gz":
-    source:       "%{hiera('private_files_dir')}/boot/disk-installer/scibian9/netboot.tar.gz"
+    source:       "%{::private_files_dir}/boot/disk-installer/scibian9/netboot.tar.gz"
     extract_path: "%{hiera('website_dir')}/disk/scibian9"
     extract:      true
 
