@@ -2,3 +2,4 @@ base.asc
 scibian*_hpc_installation_guide-*
 src/img/*.pdf
 src/img/*.png
+src/img/*_backup.svg
