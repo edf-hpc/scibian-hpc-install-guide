@@ -1,10 +1,11 @@
 ##### Common #####
 
-org: 'company' # lower-case name of the organization
+org:    'company' # lower-case name of the organization
+locale: 'en_US'
 
 ##### DNS #####
 
-domain: "%{hiera('cluster_name')}.hpc.example.org"
+domain: "%{::cluster_name}.hpc.example.org"
 
 profiles::dns::client::search: "%{hiera('domain')} hpc.example.org"
 
@@ -22,46 +23,47 @@ profiles::ntp::server::site_servers:
 ##### APT #####
 
 profiles::cluster::apt_sources:
-  '30_scibian9':
-    location: "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')}"
-    release: 'scibian9'
-    repos: 'main'
-    pin:
-      priority:   '1000'
-      originator: 'Scibian'
-    include:
-      src: false
-    architecture: 'amd64,i386'
-  '50_stretch':
-    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
-    release: 'stretch'
-    repos: 'main contrib non-free'
-    pin:
-      priority:   '500'
-      originator: 'Debian'
-    include:
-      src: false
-    architecture: 'amd64,i386'
-  '50_stretch-updates':
-    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
-    release: 'stretch-updates'
-    repos: 'main contrib non-free'
-    pin:
-      priority:   '500'
-      originator: 'Debian'
-    include:
-      src: false
-    architecture: 'amd64,i386'
-  '50_stretch-security':
-    location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_sec_mirror_dir')}"
-    release: 'stretch/updates'
-    repos: 'main contrib non-free'
-    pin:
-      priority:   '500'
-      originator: 'Debian'
-    include:
-      src: false
-    architecture: 'amd64,i386'
+  scibian9:
+    '30_scibian9':
+      location: "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')}"
+      release: 'scibian9'
+      repos: 'main'
+      pin:
+        priority:   '1000'
+        originator: 'Scibian'
+      include:
+        src: false
+      architecture: 'amd64,i386'
+    '50_stretch':
+      location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
+      release: 'stretch'
+      repos: 'main contrib non-free'
+      pin:
+        priority:   '500'
+        originator: 'Debian'
+      include:
+        src: false
+      architecture: 'amd64,i386'
+    '50_stretch-updates':
+      location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_mirror_dir')}"
+      release: 'stretch-updates'
+      repos: 'main contrib non-free'
+      pin:
+        priority:   '500'
+        originator: 'Debian'
+      include:
+        src: false
+      architecture: 'amd64,i386'
+    '50_stretch-security':
+      location: "http://%{hiera('debian_mirror_server')}/%{hiera('debian_sec_mirror_dir')}"
+      release: 'stretch/updates'
+      repos: 'main contrib non-free'
+      pin:
+        priority:   '500'
+        originator: 'Debian'
+      include:
+        src: false
+      architecture: 'amd64,i386'
 
 ##### SMTP/Postfix #####
 

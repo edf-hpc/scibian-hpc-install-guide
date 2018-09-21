@@ -1,12 +1,3 @@
-profiles::ceph::config_options:
-  global:
-    fsid:                    '9ce06246-210f-4f59-866a-1f384852da38'
-    mon_initial_members:     'fbservice2, fbservice3, fbservice4'
-    mon_host:                'fbservice2, fbservice3, fbservice4'
-    auth_cluster_required:   'cephx'
-    auth_service_required:   'cephx'
-    auth_client_required:    'cephx'
-
 ceph_client_admin_key: <eyaml encrypted key>
 
 ceph::keyrings:
@@ -45,16 +36,6 @@ ceph::osd_config:
     device: '/dev/sdb1'
     key:    <eyaml encrypted key>
 
-ceph::mon_config:
-  - fbservice2
-  - fbservice3
-  - fbservice4
-
-ceph::mds_config:
-  - fbservice2
-  - fbservice3
-  - fbservice4
-
 ceph::mds_keyring:
   fbservice2:
     mds.fbservice2:
@@ -65,12 +46,6 @@ ceph::mds_keyring:
   fbservice4:
     mds.fbservice4:
       key: <eyaml encrypted key>
-
-ceph::rgw_config:
-  - fbservice1
-  - fbservice2
-  - fbservice3
-  - fbservice4
 
 ceph::rgw_client_keyring:
   fbservice1:

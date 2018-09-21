@@ -13,7 +13,7 @@ net_topology:
     ip_range_start:   '10.3.0.1'
     ip_range_end:     '10.3.0.254'
     firewall_zone:    'wan'
-  administration:
+  backoffice:
     name:             'CLUSTER'
     ipnetwork:        '10.1.0.0'
     netmask:          '255.255.255.0'
@@ -58,18 +58,18 @@ net_topology:
     firewall_zone:    'clstr'
 
 network::bonding_options:
-  bondadm:
+  bondbo:
     slaves:
       - eno1
       - eno2
     options:     'mode=802.3ad primary=eth2 miimon=100 updelay=200 downdelay=200'
-    description: 'service nodes on adm/mgt networks'
+    description: 'service nodes on backoffice/mgt networks'
 
 network::bridge_options:
-  bradm:
+  brbo:
     ports:
-      - bondadm
-    description: 'service nodes on administration network'
+      - bondbo
+    description: 'service nodes on backoffice network'
   brmgt:
     ports:
       - eno3
@@ -83,10 +83,10 @@ master_network:
   fbservice1:
     fqdn: "fbservice1.%{hiera('domain')}"
     networks:
-      administration:
+      backoffice:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:00'
         'IP':       '10.1.0.1'
-        'device':   'bradm'
+        'device':   'brbo'
         'hostname': 'fbservice1'
       lowlatency:
         'IP':       '10.4.0.1'
@@ -107,10 +107,10 @@ master_network:
   fbservice2:
     fqdn: "fbservice2.%{hiera('domain')}"
     networks:
-      administration:
+      backoffice:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:02'
         'IP':       '10.1.0.2'
-        'device':   'bradm'
+        'device':   'brbo'
         'hostname': 'fbservice2'
       lowlatency:
         'IP':       '10.4.0.2'
@@ -131,10 +131,10 @@ master_network:
   fbservice3:
     fqdn: "fbservice3.%{hiera('domain')}"
     networks:
-      administration:
+      backoffice:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:04'
         'IP':       '10.1.0.3'
-        'device':   'bradm'
+        'device':   'brbo'
         'hostname': 'fbservice3'
       lowlatency:
         'IP':       '10.4.0.3'
@@ -155,10 +155,10 @@ master_network:
   fbservice4:
     fqdn: "fbservice4.%{hiera('domain')}"
     networks:
-      administration:
+      backoffice:
         'DHCP_MAC': 'aa:bb:cc:dd:ee:06'
         'IP':       '10.1.0.4'
-        'device':   'bradm'
+        'device':   'brbo'
         'hostname': 'fbservice4'
       lowlatency:
         'IP':       '10.4.0.4'
@@ -179,12 +179,9 @@ master_network:
 
 #### High-Availability Virtual IP addresses ######
 
-## This secret value MUST be changed later and/or higher
-## in the hierarchy. It MUST be encrypted with eyaml.
-vips_secret: 'CHANGEME'
 vips:
   service1:
-    network:    'administration'
+    network:    'backoffice'
     ip:         '10.1.0.101'
     hostname:   'vipfbservice1'
     router_id:  161
@@ -193,7 +190,7 @@ vips:
     secret:     "%{hiera('vips_secret')}"
     advert_int: '2'
   service2:
-    network:    'administration'
+    network:    'backoffice'
     ip:         '10.1.0.102'
     hostname:   'vipfbservice2'
     router_id:  162
@@ -202,7 +199,7 @@ vips:
     secret:     "%{hiera('vips_secret')}"
     advert_int: '2'
   service3:
-    network:    'administration'
+    network:    'backoffice'
     ip:         '10.1.0.103'
     hostname:   'vipfbservice3'
     router_id:  163
@@ -211,7 +208,7 @@ vips:
     secret:     "%{hiera('vips_secret')}"
     advert_int: '2'
   service4:
-    network:    'administration'
+    network:    'backoffice'
     ip:         '10.1.0.104'
     hostname:   'vipfbservice4'
     router_id:  164

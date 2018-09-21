@@ -1,15 +1,27 @@
-cluster_prefix: 'fb' # Prefix starting all nodes hostnames
-
-
 user_groups: # Array of user groups allowed to access to the cluster
   - 'grpusers1'
   - 'grpusers2'
 admin_group: 'grpadmin'
 
+###### Areas ######
+
+# Optionlly define areas (with associated network/subnetworks) by
+# uncommenting the following hash:
+#
+#areas:
+#  infra:
+#    network: backoffice
+#    subnetwork: boinfra
+#  user:
+#    network: backoffice
+#    subnetwork: bouser
+#
+# If using only the default area, this parameter does not need to be defined.
+
 ###### Installer ######
 scibian_mirror_server: 'scibian.org'
 scibian_mirror_dir:    'repo'
-debian_mirror_server:  'ftp.debian.org'
+debian_mirror_server:  'deb.debian.org'  # debian geo mirror
 debian_mirror_dir:     'debian'
 
 ###### DNS Cluster settings ######
@@ -38,161 +50,13 @@ profiles::dns::server::config_options:
 ###### Bootsystem ######
 
 boot_params:
-  defaults:                                  # default boot params to all nodes
-    domain:             "%{hiera('domain')}"
-    kernel_opts:        'persistence formatcow nosmap'
-    cowsize:            '2G'
-    dhcp_timeout:       '120'
-    diskinstall_server: "%{hiera('server_web_boot')}"
-    diskless_server:    '10.1.0.50:3137' # VIP addresse of P2P servers
-    nameserver:         '10.1.0.101'     # VIP address of 1st generic
-                                         # service on administration network
-    boot_os:            'scibian9_ram'
-    boot_dev:           'eth0'
-    console:            'ttyS0,115200n8'
-    disk_raid:          ''
-    disk_format:        ''
-  fbservice[1-4]:                            # generic service nodes specific
-                                             # boot params
-    boot_os:            'scibian9_disk'
-    ipxebin:            'ipxe_noserial.bin'
+  fbservice[1-4]:  # generic service nodes specific boot params
+    boot_dev: 'eno0'
 
-# iPXE ROM downloaded by TFTP. There are 2 versions of the same ROM: with
-# software serial console enabled for virtual machines and w/o software
-# serial console for bare metal machines, as the serial console is transparently
-# redirected to the BMC virtual serial port by the BIOS/UEFI on these nodes.
-boottftp::hpc_files:
-  "%{hiera('tftp_dir')}/ipxe_serial.bin":
-    source: "%{::private_files_dir}/boot/ipxe/ipxe_serial.bin"
-  "%{hiera('tftp_dir')}/ipxe_noserial.bin":
-    source: "%{::private_files_dir}/boot/ipxe/ipxe_noserial.bin"
-
-# Configuration files downloaded by HTTP by the debian-installer: the partition
-# schema and hpc-config-apply configuration file.
+# hpc-config-apply configuration file downloaded by the debian-installer.
 boothttp::hpc_files:
-  "%{hiera('website_dir')}/disk/scibian9/partition-schema":
-    source: "%{::private_files_dir}/boot/disk-installer/scibian9/partition-schema"
-  "%{hiera('website_dir')}/disk/scibian9/hpc-config.conf":
+  "%{hiera('website_dir')}/disk/hpc-config.conf":
     source: "file:///etc/hpc-config.conf"
-
-# The tarball containing the Debian network installer
-boothttp::archives:
-  "%{hiera('website_dir')}/disk/scibian9/netboot.tar.gz":
-    source:       "%{::private_files_dir}/boot/disk-installer/scibian9/netboot.tar.gz"
-    extract_path: "%{hiera('website_dir')}/disk/scibian9"
-    extract:      true
-
-profiles::http::secret::areas:
-  - 'service'
-  - 'user'
-
-boothttp::install_options:
-  scibian9:
-    ### Localization
-    'd-i debian-installer/locale string':                   'en_US.UTF-8'
-    'd-i debian-installer/language string':                 'en'
-    'd-i debian-installer/country string':                  'en'
-    'd-i localechooser/supported-locales multiselect':      'en_US.UTF-8'
-    # Keyboard selection.
-    'd-i keyboard-configuration/xkb-keymap select':         'en'
-    ### Apt setup
-    'apt-setup-udeb apt-setup/services-select multiselect': 'none'
-    'apt-mirror-setup apt-setup/contrib boolean':           'true'
-    'apt-mirror-setup apt-setup/no_mirror boolean':         'false'
-    'apt-mirror-setup apt-setup/non-free boolean':          'true'
-    'apt-mirror-setup apt-setup/use_mirror boolean':        'true'
-    ### Mirror settings
-    'd-i mirror/protocol select':                           'http'
-    'd-i mirror/country string':                            'manual'
-    'd-i mirror/http/hostname string':                      "%{hiera('debian_mirror_server')}"
-    'd-i mirror/http/directory string':                     "/%{hiera('debian_mirror_dir')}"
-    'd-i mirror/http/proxy string':                         "http://apt.service.%{hiera('virtual_domain')}:%{hiera('apt::proxy_port')}"
-    'd-i mirror/suite string':                              'stretch'
-    'd-i debian-installer/allow_unauthenticated boolean':   'true'
-    ### Network configuration
-    'd-i netcfg/enable boolean':                            'true'
-    'd-i netcfg/choose_interface select':                   'auto'
-    'd-i netcfg/use_autoconfig boolean':                    'true'
-    'd-i netcfg/no_default_route boolean':                  'true'
-    'd-i netcfg/get_domain string':                         "%{hiera('domain')}"
-    # VIP addresses of the generic service nodes on the administration network
-    'd-i netcfg/get_nameservers string':                    '10.1.0.101 10.1.0.102 10.1.0.103 10.1.0.104'
-    'd-i netcfg/dhcp_failed':                               'note'
-    'd-i netcfg/dhcp_options select Configure network':     'manually'
-    'd-i netcfg/dhcp_timeout string':                       '25'
-    'd-i netcfg/dhcpv6_timeout string':                     '3'
-    # Hardware detect
-    'd-i hw-detect/start_pcmcia boolean':                   'false'
-    'd-i hw-detect/load_firmware boolean':                  'true'
-    ### Partitioning
-    'd-i partman/early_command string': >
-      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian9/partition-schema -O /partition-schema;
-      debconf-set partman-auto/disk "$(list-devices disk | head -n1)"
-    'd-i partman-auto/method string':                                           'lvm'
-    'd-i partman-partitioning/choose_label select':                             'gpt'
-    'd-i partman-partitioning/confirm_write_new_label boolean':                 'true'
-    'd-i partman-auto/expert_recipe_file string':                               '/partition-schema'
-    'partman-basicfilesystems partman-basicfilesystems/no_mount_point boolean': 'false'
-    'd-i partman-lvm/device_remove_lvm boolean':                                'true'
-    'd-i partman-auto/purge_lvm_from_device boolean':                           'true'
-    'd-i partman-md/device_remove_md boolean':                                  'true'
-    'd-i partman-md/confirm_nochanges boolean':                                 'true'
-    'd-i partman-lvm/confirm boolean':                                          'true'
-    'd-i partman-lvm/confirm_nooverwrite  boolean':                             'true'
-    'd-i partman-auto/choose_recipe select':                                    'multiraid'
-    'd-i partman-md/confirm boolean':                                           'true'
-    'd-i partman-md/confirm_nooverwrite  boolean':                              'true'
-    'd-i partman/confirm_write_new_label boolean':                              'true'
-    'd-i partman/confirm_nooverwrite boolean':                                  'true'
-    'd-i partman/choose_partition select':                                      'finish'
-    'd-i partman/confirm boolean':                                              'true'
-    ### Boot loader
-    'grub-installer grub-installer/only_debian boolean':   'true'
-    'grub-installer grub-installer/bootdev string':        'default'
-    'grub-installer grub-installer/skip boolean':          'false'
-    'grub-installer grub-installer/multipath boolean':     'true'
-    'grub-installer grub-installer/with_other_os boolean': 'false'
-    'grub-installer grub-installer/make_active boolean':   'true'
-    # Don't create a normal user account.
-    'user-setup-udeb passwd/make-user boolean':            'false'
-    'user-setup-udeb passwd/root-login boolean':           'true'
-    'user-setup-udeb passwd/shadow boolean':               'true'
-    ### Clock and time zone setup
-    'clock-setup clock-setup/utc boolean':                 'true'
-    'clock-setup clock-setup/system-time-changed boolean': 'false'
-    'clock-setup clock-setup/hwclock-wait boolean':        'false'
-    'clock-setup clock-setup/ntp boolean':                 'false'
-    'tzsetup-udeb time/zone select':                       'GMT'
-    ### Base system installation
-    'bootstrap-base base-installer/kernel/image select':                  'linux-image-amd64'
-    'bootstrap-base base-installer/initramfs-tools/driver-policy select': 'dep'
-    'base-installer base-installer/install-recommends boolean':           'false'
-    ### Package selection
-    'tasksel tasksel/first multiselect': 'standard, ssh-server'
-    'd-i pkgsel/include string': >
-      apt-transport-https
-      scibian-archive-keyring
-      hpc-config-apply
-    # Additional repositories, local[0-9] available
-    'd-i apt-setup/local0/repository string': "http://%{hiera('scibian_mirror_server')}/%{hiera('scibian_mirror_dir')} scibian9 main contrib non-free"
-    'd-i pkgsel/upgrade select':              'full-upgrade'
-    # Other packages ##
-    'd-i popularity-contest/participate boolean':                       'false'
-    'console-setup console-setup/charmap47 select':                     'UTF-8'
-    'console-setup console-setup/codesetcode string':                   'Lat15'
-    'console-setup console-setup/store_defaults_in_debconf_db boolean': 'true'
-    'console-setup console-setup/fontsize-fb47 select':                 '8x16'
-    'console-setup console-setup/fontsize string':                      '8x16'
-    ### Late command ###
-    'd-i preseed/late_command string': >
-      /bin/in-target sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config;
-      env -u http_proxy wget http://%{hiera('server_web_boot')}/disk/scibian9/hpc-config.conf -O /target/etc/hpc-config.conf;
-      /bin/in-target mkdir -p /var/lib/puppet/facts.d;
-      /bin/in-target /usr/bin/env -u http_proxy hpc-config-apply -vvv;
-    # Root password, either in clear text
-    'd-i passwd/root-password-crypted password': "%{hiera('profiles::cluster::root_password_hash')}"
-    # Avoid that last message about the install being complete.
-    'd-i finish-install/reboot_in_progress note': ''
 
 ###### DHCP ######
 
@@ -200,9 +64,9 @@ profiles::dhcp::default_options:
   - 'INTERFACES=bradm' # bridge interfaces of the generic service nodes on the
                        # administration and management networks
 profiles::dhcp::includes:
-  adm-subnet:
+  bo-subnet:
     'pool_name':                   'subnet'
-    'subnet_name':                 'adm'
+    'subnet_name':                 'backoffice-default'
     'tftp':                        true
     'pool':
       'use-host-decl-names':       'on'
@@ -213,7 +77,7 @@ profiles::dhcp::includes:
       'include':                   '/etc/dhcp/adm_subnet'
   mgt-subnet:
     'pool_name':                   'subnet'
-    'subnet_name':                 'mgt'
+    'subnet_name':                 'management-default'
     'tftp':                        false
     'pool':
       'use-host-decl-names':       'on'
@@ -222,25 +86,3 @@ profiles::dhcp::includes:
       # Range of IP addresses on the management network
       'range':                     '10.2.0.1 10.2.0.254'
       'include':                   "/etc/dhcp/mgt_subnet"
-
-profiles::dhcp::sharednet:
-  'name':                          "%{hiera('cluster_name')}net"
-  'subnet':
-    - 'name':                      'adm'
-      'network':                   "%{hiera('net::administration::ipnetwork')}"
-      'netmask':                   "%{hiera('net::administration::netmask')}"
-      'domain-name':               "%{hiera('domain')}"
-      # VIP addresses of the generic service nodes on the administration network
-      'domain-name-servers':       '10.1.0.101, 10.1.0.102 10.1.0.103 10.1.0.104'
-      'broadcast':                 "%{hiera('net::administration::broadcast')}"
-    - 'name':                      'mgt'
-      'network':                   "%{hiera('net::management::ipnetwork')}"
-      'netmask':                   "%{hiera('net::management::netmask')}"
-      'domain-name':               "%{hiera('domain')}"
-      # Static IP addresses of the generic service nodes on the management network
-      'domain-name-servers':       '10.2.0.1, 10.2.0.2, 10.2.0.3, 10.2.0.4'
-      'broadcast':                 "%{hiera('net::management::broadcast')}"
-
-profiles::dhcp::networks:
-  - administration
-  - management

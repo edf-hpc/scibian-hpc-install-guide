@@ -1,0 +1,24 @@
+profiles::ceph::config_options:
+  global:
+    fsid:                    '<fsid>'
+    mon_initial_members:     'fbservice2, fbservice3, fbservice4'
+    mon_host:                'fbservice2, fbservice3, fbservice4'
+    auth_cluster_required:   'cephx'
+    auth_service_required:   'cephx'
+    auth_client_required:    'cephx'
+
+ceph::mon_config:
+  - fbservice2
+  - fbservice3
+  - fbservice4
+
+ceph::mds_config:
+  - fbservice2
+  - fbservice3
+  - fbservice4
+
+ceph::rgw_config:
+  - fbservice1
+  - fbservice2
+  - fbservice3
+  - fbservice4
