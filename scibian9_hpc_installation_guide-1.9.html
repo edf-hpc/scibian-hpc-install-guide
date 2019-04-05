@@ -640,8 +640,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_metrics">16.7. Metrics</a></li>
 <li><a href="#_hpcstats_2">16.8. HPCStats</a></li>
 <li><a href="#_slurm_wckeys">16.9. Slurm WCKeys</a></li>
-<li><a href="#_nfs_high_availability">16.10. NFS High-Availability</a></li>
-<li><a href="#_slurm_power_management">16.11. Slurm power management</a></li>
+<li><a href="#_slurm_web_rest_api">16.10. Slurm-web REST API</a></li>
+<li><a href="#_nfs_high_availability">16.11. NFS High-Availability</a></li>
+<li><a href="#_slurm_power_management">16.12. Slurm power management</a></li>
 </ul>
 </li>
 </ul>
@@ -814,13 +815,19 @@ documentation:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>asciidoctor &gt;= 1.5.0~alpha16</p>
+<p>asciidoctor &gt;= 0.1.4</p>
 </li>
 <li>
-<p>asciidoctor-scibian-tpl</p>
+<p>asciidoctor-scibian-tpl-latex</p>
 </li>
 <li>
 <p>inkscape</p>
+</li>
+<li>
+<p>rubber</p>
+</li>
+<li>
+<p>texlive-latex-extra</p>
 </li>
 </ul>
 </div>
@@ -3905,7 +3912,7 @@ temporary subdirectory:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash"><span></span>eyaml createkeys <span class="tok-se">\</span>
-  --pkcs7-private-key <span class="tok-nv">$KEYS_DIR</span>/keys/private_key.pkcs7.pem
+  --pkcs7-private-key <span class="tok-nv">$KEYS_DIR</span>/keys/private_key.pkcs7.pem <span class="tok-se">\</span>
   --pkcs7-public-key <span class="tok-nv">$KEYS_DIR</span>/keys/public_key.pkcs7.pem</code></pre>
 </div>
 </div>
@@ -3915,7 +3922,7 @@ temporary subdirectory:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-c1"># build archive</span>
-tar cJf KEYS_DIR/keys.tar.xz <span class="tok-se">\</span>
+tar cJf <span class="tok-nv">$KEYS_DIR</span>/keys.tar.xz <span class="tok-se">\</span>
     -C <span class="tok-nv">$KEYS_DIR</span> keys
 
 <span class="tok-c1"># delete temporary keys subdirectory</span>
@@ -3946,25 +3953,33 @@ cluster&#8217;s files directory of the internal configuration repository before 
 first installation and/or diskless boot.</p>
 </div>
 <div class="paragraph">
-<p>During this step, the <code>known_hosts</code> file will also be synchronized with the
-generated keys. This file will be stored in
-<code>hpc-privatedata/files/$CLUSTER/cluster/ssh/known_hosts</code>. To build this file,
-the script needs to know the local domain name for the cluster, the script will
-use the local domain of the machine where it runs by default. If this is not
-correct you must provide the domain.</p>
-</div>
-<div class="paragraph">
-<p>Run the following script:</p>
+<p>This cluster nodes classifier utility is run by the SSH hostkeys generation
+script to get the area of the nodes. Initially, copy the configuration file of
+this utility to its target path:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span>puppet-hpc/scripts/sync-ssh-hostkeys.sh <span class="tok-se">\</span>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>cp <span class="tok-nv">$ADMIN</span>/hpc-privatedata/puppet-config/<span class="tok-nv">$CLUSTER</span>/cluster-nodes.yaml <span class="tok-se">\</span>
+  /etc/hpc-config/cluster-nodes.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To generate the hostkeys, the script needs to know the local domain name of the
+cluster. By default, the script will use the local domain of the machine where
+it runs by default. If this is not correct you must provide the domain in
+argument. Run the script with the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-nb">cd</span> <span class="tok-nv">$ADMIN</span> <span class="tok-o">&amp;&amp;</span> puppet-hpc/scripts/sync-ssh-hostkeys.sh <span class="tok-se">\</span>
   hpc-privatedata <span class="tok-nv">$CLUSTER</span> <span class="tok-o">[</span><span class="tok-nv">$CLUSTER</span>.<span class="tok-nv">$NETDOMAIN</span><span class="tok-o">]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>This script ensures that all nodes present in the <code>master_network</code> hash have
-valid SSH host keys.</p>
+valid SSH host keys. During this step, the <code>known_hosts</code> file will also be
+synchronized with the generated keys. This file will be stored in
+<code>hpc-privatedata/files/$CLUSTER/cluster/ssh/known_hosts</code>.</p>
 </div>
 </div>
 <div class="sect3">
@@ -4200,11 +4215,15 @@ hpc-config-push
 mkdir <span class="tok-nv">$ADMIN</span>/keys
 chmod <span class="tok-m">700</span> <span class="tok-nv">$ADMIN</span>/keys
 tar cJf  <span class="tok-nv">$ADMIN</span>/keys/keys.tar.xz -C/etc/puppet/secure keys
-hpc-config-apply --source file:///var/www/html/hpc-config <span class="tok-se">\</span>
+hpc-config-apply --source file:///var/www/system/hpc-config <span class="tok-se">\</span>
                    --keys-source<span class="tok-o">=</span>file://<span class="tok-nv">$ADMIN</span>/keys <span class="tok-se">\</span>
+                   <span class="tok-o">[</span>--area &lt;AREA&gt;<span class="tok-o">]</span>
                    --verbose
 rm -rf <span class="tok-nv">$ADMIN</span>/keys</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The area parameter is required if the service node is not in <em>default</em> area.</p>
 </div>
 <div class="paragraph">
 <p>If the run returned no error, there is some checks to do before proceeding. In
@@ -4228,12 +4247,22 @@ IP1</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>With these commands we are now sure that:
-* The Apache System service is responding properly
-* The DNS service on the current node is working and always return the
-  <code>install_server_ip</code> for all the <code>.virtual</code> requests
-* The virtual IP addresses are up and all responding on the current service
-  node.</p>
+<p>With these commands we are now sure that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The Apache System service is responding properly</p>
+</li>
+<li>
+<p>The DNS service on the current node is working and always return the
+<code>install_server_ip</code> for all the <code>.virtual</code> requests</p>
+</li>
+<li>
+<p>The virtual IP addresses are up and all responding on the current service
+node.</p>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect2">
@@ -4251,7 +4280,7 @@ configuration to use the newly configured local DNS server.</p>
 <pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">hpcconfig::apply::config_options</span><span class="tok-p tok-p-Indicator">:</span>
   <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">DEFAULT</span><span class="tok-p tok-p-Indicator">:</span>
     <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">source</span><span class="tok-p tok-p-Indicator">:</span>
-      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">value</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-s">&quot;%{hiera(&#39;install_server_ip&#39;)}:%{hiera(&#39;profiles::http::system::port&#39;)}/hpc-config&quot;</span>
+      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">value</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-s">&quot;http://web-system.service.virtual:%{hiera(&#39;profiles::http::system::port&#39;)}/hpc-config&quot;</span>
     <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">keys_source</span><span class="tok-p tok-p-Indicator">:</span>
       <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">value</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-s">&quot;http://secret.service.%{hiera(&#39;virtual_domain&#39;)}:%{hiera(&#39;secret_port&#39;)}/%{::area}&quot;</span></code></pre>
 </div>
@@ -4322,6 +4351,52 @@ fbservice[2-4] (3)
 ---------------
 Linux</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>At this stage, all generic services nodes are available to host the configuration
+environments. The parameters of the <code>hpc-config-push</code> utility can be updated to
+switch from <em>posix</em> to <em>sftp</em>. In this mode, the utility will upload the
+configuration environment on all generic service nodes. Edit
+<code>$ADMIN/hpc-privatedata/hieradata/$CLUSTER/cluster.yaml</code> file to update the
+<code>hpconfig::push::config_options</code> hash with the following changes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span> hpcconfig::push::config_options:
+   global:
+     cluster:     &quot;%{::cluster_name}&quot;
+<span class="tok-gd">-    mode:        &#39;posix&#39;</span>
+<span class="tok-gi">+    mode:        &#39;sftp&#39;</span>
+     destination: &quot;%{hiera(&#39;profiles::http::system::docroot&#39;)}/hpc-config&quot;
+     areas:       &#39;infra,user&#39;
+<span class="tok-gi">+  sftp:</span>
+<span class="tok-gi">+    hosts:       &#39;fbservice1,fbservice2,fbservice3,fbservice4&#39;</span>
+<span class="tok-gi">+    private_key: &#39;/root/.ssh/id_rsa_root&#39;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then push and apply the configuration on the first service node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-nb">cd</span> <span class="tok-nv">$ADMIN</span> <span class="tok-o">&amp;&amp;</span> hpc-config-push <span class="tok-o">&amp;&amp;</span> hpc-config-apply -v</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will update <code>/etc/hpc-config/push.conf</code> configuration file.</p>
+</div>
+<div class="paragraph">
+<p>Then run this command again to upload the configuration environment on all
+service nodes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span><span class="tok-nb">cd</span> <span class="tok-nv">$ADMIN</span> <span class="tok-o">&amp;&amp;</span> hpc-config-push</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Starting from now, all generic service nodes can be used as a valid source for
+the configuration environments.</p>
 </div>
 </div>
 <div class="sect2">
@@ -4923,8 +4998,8 @@ fbservice4  10.1.0.4:8301  alive   server  0.6.4  2         foobar</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">--- a/hpc-privatedata/hieradata/foobar/roles/cluster.yaml</span>
-<span class="tok-gi">+++ b/hpc-privatedata/hieradata/foobar/roles/cluster.yaml</span>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">--- a/hpc-privatedata/hieradata/foobar/cluster.yaml</span>
+<span class="tok-gi">+++ b/hpc-privatedata/hieradata/foobar/cluster.yaml</span>
 <span class="tok-gu">@@ -225,8 +225,3 @@</span>
        # Static IP addresses of the generic service nodes on the management network
        &#39;domain-name-servers&#39;:       &#39;10.2.0.1, 10.2.0.2, 10.2.0.3, 10.2.0.4&#39;
@@ -4953,7 +5028,7 @@ fbservice4  10.1.0.4:8301  alive   server  0.6.4  2         foobar</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># dig +short http.service.virtual
+<pre># dig +short web-system.service.virtual
 10.1.0.4
 10.1.0.2
 10.1.0.3</pre>
@@ -5273,7 +5348,7 @@ using <code>eyaml</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash"><span></span>ceph auth get-key client.libvirt<span class="tok-sb">`</span></code></pre>
+<pre class="pygments highlight"><code data-lang="bash"><span></span>ceph auth get-key client.libvirt</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -6678,13 +6753,56 @@ clara ipmi boot @front,@cn,@gn</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_nfs_high_availability">16.10. NFS High-Availability</h3>
+<h3 id="_slurm_web_rest_api">16.10. Slurm-web REST API</h3>
+<div class="paragraph">
+<p><a href="http://edf-hpc.github.io/slurm-web/">Slurm-web</a> is both a web interface and REST
+API service to get and visualize the current status of the jobs and ressources
+managed by Slurm.</p>
+</div>
+<div class="paragraph">
+<p>Puppet-HPC is able to deploy the REST API component of Slurm.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span>mkdir hpc-privatedata/files/<span class="tok-nv">$CLUSTER</span>/<span class="tok-nv">$AREA</span>/slurmweb
+head -c <span class="tok-m">48</span> /dev/urandom <span class="tok-p">|</span> base64 &gt; files/<span class="tok-nv">$CLUSTER</span>/<span class="tok-nv">$AREA</span>/slurmweb/secret.key
+clara enc encode hpc-privatedata/files/<span class="tok-nv">$CLUSTER</span>/<span class="tok-nv">$AREA</span>/slurmweb/secret.key
+rm hpc-privatedata/files/<span class="tok-nv">$CLUSTER</span>/<span class="tok-nv">$AREA</span>/slurmweb/secret.key</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where <code>$AREA</code> is the area of the nodes hosting the REST API.</p>
+</div>
+<div class="paragraph">
+<p>Then, define XML cluster racking description file
+<code>hpc-privatedata/files/$CLUSTER/$AREA/slurmweb/racks.xml</code> according to
+<a href="http://edf-hpc.github.io/slurm-web/installation.html#xml-racks-and-nodes-description">Slurm-web documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>Add <code>profiles::http::slurmweb</code> profile in the role of the nodes hosting the
+REST API.</p>
+</div>
+<div class="paragraph">
+<p>Finally, push and apply the new configuration on the admin node and on the
+nodes hosting the profile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="bash"><span></span>hpc-config-push
+hpc-config-apply
+clush -bg admin,hpc_profiles:http::slurm-web <span class="tok-se">\</span>
+  hpc-config-apply -v</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_nfs_high_availability">16.11. NFS High-Availability</h3>
 <div class="paragraph">
 <p><strong>TBD</strong></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_slurm_power_management">16.11. Slurm power management</h3>
+<h3 id="_slurm_power_management">16.12. Slurm power management</h3>
 <div class="paragraph">
 <p>Generate and encrypt the SSH key used to poweroff the nodes from the batch
 nodes:</p>
@@ -6913,9 +7031,7 @@ cluster replication status with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># mysql -e "SELECT VARIABLE_VALUE as cluster_size \
-            FROM INFORMATION_SCHEMA.GLOBAL_STATUS \
-            WHERE VARIABLE_NAME='wsrep_cluster_size'"</pre>
+<pre># mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size'"</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -8544,7 +8660,7 @@ and the pool name.</p>
 <div id="footer">
 <div id="footer-text">
 Version 1.9<br>
-Last updated 2018-09-17 16:17:30 CEST
+Last updated 2019-04-05 16:56:15 CEST
 </div>
 </div>
 </body>
