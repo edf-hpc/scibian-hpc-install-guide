@@ -9,10 +9,9 @@ https://scibian.github.io/scibian-hpc-install-guide
 
 To build this doc, install the following packages:
 
-* asciidoctor >= 0.1.4
-* asciidoctor-scibian-tpl-latex
-* rubber
-* texlive-latex-extra
+* asciidoctor-pdf >= 1.5.0~alpha16
+* asciidoctor-scibian-tpl
+* scibian-logos
 * inkscape
 
 Then, run:
