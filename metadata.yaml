@@ -1,6 +1,11 @@
 title: Scibian 9 HPC Installation guide
 name: scibian9_hpc_installation_guide
 versions:
+- tag: 1.92
+  date: 2019-09-30
+  status: draft
+  changes:
+  - "Add Custom Consul services definition"
 - tag: 1.91
   date: 2019-06-26
   status: draft
